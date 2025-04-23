@@ -14,7 +14,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     };
 
     for ele in results {
-        println!("{ele}");
+        eprintln!("{ele}");
     }
     Ok(())
 }
@@ -36,12 +36,23 @@ impl Config {
 
     //     Config { query, file_path }
     // }
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        // if args.len() < 3 {
+        //     return Err("not enough arguments");
+        // }
+        // let query = args[1];
+        // let file_path = args[2];
+        args.next();
+
+        let query = match args.next() {
+            Some(str) => str,
+            None => return Err("not enough arguments"),
+        };
+
+        let file_path = match args.next() {
+            Some(str) => str,
+            None => return Err("not enough arguments"),
+        };
 
         let case_sensitive_flag = env::var("CASE_SENSITIVE").ok();
         let case_sensitive = match case_sensitive_flag.as_deref() {
@@ -60,14 +71,18 @@ impl Config {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
+    // let mut results = Vec::new();
 
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-    results
+    // for line in contents.lines() {
+    //     if line.contains(query) {
+    //         results.push(line);
+    //     }
+    // }
+    // results
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search2<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
