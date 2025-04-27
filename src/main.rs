@@ -1,25 +1,35 @@
-use std::env;
-use std::process;
-// crate import
-use minigrep::Config;
+use rand::Rng;
+use std::io;
 
-// in main.rs
 fn main() {
-    // let args: Vec<String> = env::args().collect();
+    println!("Guess the number!");
 
-    // let config = Config::new(&args);
+    let secret_number = rand::rng().random_range(1..=100);
 
-    let config: Config = Config::build(env::args()).unwrap_or_else(|err| {
-        println!("Problem parsing arguments: {err}");
-        process::exit(1);
-    });
+    loop {
+        println!("Please input your guess.");
 
-    println!("Searching for {}", config.query);
-    println!("In file {}", config.file_path);
+        // whats mutable variable?
+        let mut guess = String::from("");
+        // why mutable reference?
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
 
-    // if let match err
-    if let Err(e) = minigrep::run(config) {
-        println!("Application error: {e}");
-        process::exit(1);
+        let guess: i32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        println!("You guessed: {}", guess);
+
+        match guess.cmp(&secret_number) {
+            std::cmp::Ordering::Less => println!("Too small!"),
+            std::cmp::Ordering::Greater => println!("Too big!"),
+            _ => {
+                println!("You win!");
+                break;
+            }
+        }
     }
 }
